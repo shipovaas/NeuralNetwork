@@ -1,16 +1,20 @@
 #pragma once
 
+#include "eigen/Eigen/Dense"
+
 #include <iostream>
 #include <vector>
 
 
 class LossFunction {
+    using Matrix = Eigen::MatrixXd;
+    using Vector = Eigen::VectorXd;
 public:
-    LossFunction(const std::vector<double> &pred, std::vector<double> &result);
+    LossFunction(const Vector &pred, Vector &result);
 
     double Distance() const;
 
 private:
-    std::vector<double> prediction;
-    std::vector<double> real_result;
+    Vector prediction;
+    Vector real_result;
 };

@@ -1,8 +1,7 @@
 #include "LossFunction.h"
 #include <cmath>
 
-LossFunction::LossFunction(const std::vector<double> &pred, std::vector<double> &result) : prediction(pred),
-                                                                                           real_result(result) {}
+LossFunction::LossFunction(const Vector &pred, Vector &result) : prediction(pred),real_result(result) {}
 
 double LossFunction::Distance() const {
     double distance = 0.0;

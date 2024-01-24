@@ -1,17 +1,21 @@
 #pragma once
 
+#include "eigen/Eigen/Dense"
+
 #include <iostream>
 #include <vector>
 
 class ActivationFunction {
+    using Matrix = Eigen::MatrixXd;
+    using Vector = Eigen::VectorXd;
 public:
     using signature = double(double);
     ActivationFunction(std::function<signature> s0, std::function<signature> s1);
     //using Vector = std::Vector
 
-    std::vector<double> ApplyFunction(const std::vector<double> &vec);
+    Vector ApplyFunction(const Vector &vec);
 
-    std::vector<double> ApplyDerivative(const std::vector<double> &vec);
+    Vector ApplyDerivative(const Vector &vec);
 
 private:
     std::function<signature> f1_;
