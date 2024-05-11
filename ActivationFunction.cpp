@@ -1,20 +1,49 @@
 #include "ActivationFunction.h"
 #include <cmath>
+#include "ActivationFunction.h"
 
-ActivationFunction::ActivationFunction(std::function<signature> s0, std::function<signature> s1) : f0_(std::move(s0)), f1_(std::move(s1)){};
+namespace neuralnet {
 
-ActivationFunction::Vector ActivationFunction::ApplyFunction(const Vector &vec) {
-    return vec.unaryExpr([this](double x){return f0_(x);});
-}
+    ActivationFunction::ActivationFunction(Function func, Function deriv)
+            : func_(func), deriv_(deriv) {}
 
-ActivationFunction::Vector ActivationFunction::ApplyDerivative(const Vector &vec) {
-    return vec.unaryExpr([this](double x){return f1_(x);});
-}
+    DataType ActivationFunction::calc(DataType x) const {
+        return func_(x);
+    }
 
-double Sigmoid::ApplyFunction(double x) {
-    return 1 / (1 + exp(-x));
-}
+    DataType ActivationFunction::derivative(DataType x) const {
+        return deriv_(x);
+    }
 
-double Sigmoid::ApplyDerivative(double x) {
-    return exp(-x) / ((1 + exp(-x)) * (1 + exp(-x)));
-}
+    Eigen::VectorXd ActivationFunction::calc(const Eigen::VectorXd& x) const {
+        return x.unaryExpr(func_);
+    }
+
+    Eigen::MatrixXd ActivationFunction::derivative(const Eigen::VectorXd& x) const {
+        return x.unaryExpr(deriv_).asDiagonal();
+    }
+
+    ActivationFunction ActivationFunction::create(ActivationType type) {
+        switch (type) {
+            case ActivationType::Sigmoid:
+                return ActivationFunction(
+                        [](DataType x) { return 1.0 / (1.0 + std::exp(-x)); },
+                        [](DataType x) { DataType s = 1.0 / (1.0 + std::exp(-x)); return s * (1 - s); });
+            case ActivationType::Tanh:
+                return ActivationFunction(
+                        [](DataType x) { return std::tanh(x); },
+                        [](DataType x) { return 1.0 - std::pow(std::tanh(x), 2); });
+            case ActivationType::ReLU:
+                return ActivationFunction(
+                        [](DataType x) { return std::max(0.0, x); },
+                        [](DataType x) { return x > 0 ? 1.0 : 0.0; });
+            case ActivationType::Linear:
+                return ActivationFunction(
+                        [](DataType x) { return x; },
+                        [](DataType x) { return 1.0; });
+            default:
+                throw std::runtime_error("Unsupported activation type.");
+        }
+    }
+
+} // namespace neuralnet

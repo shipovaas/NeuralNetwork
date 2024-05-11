@@ -1,32 +1,33 @@
 #pragma once
 
 #include "eigen/Eigen/Dense"
+#include <cmath>
+#include <functional>
 
-#include <iostream>
-#include <vector>
+namespace neuralnet {
 
-class ActivationFunction {
-    using Matrix = Eigen::MatrixXd;
-    using Vector = Eigen::VectorXd;
-public:
-    using signature = double(double);
-    ActivationFunction(std::function<signature> s0, std::function<signature> s1);
-    //using Vector = std::Vector
+    using DataType = double;  // Определение базового типа данных
+    using Vector = Eigen::VectorXd;  // Использование типа Vector из Eigen
+    using Matrix = Eigen::MatrixXd;  // Использование типа Matrix из Eigen
 
-    Vector ApplyFunction(const Vector &vec);
+    enum class ActivationType { Sigmoid, Tanh, ReLU, Linear, Softmax }; // Перечисление типов функций активации
 
-    Vector ApplyDerivative(const Vector &vec);
+    class ActivationFunction {
+    public:
+        using Function = std::function<DataType(DataType)>; // Определение типа функции для активации
 
-private:
-    std::function<signature> f1_;
-    std::function<signature> f0_;
-};
+        ActivationFunction(Function func, Function deriv); // Конструктор с параметрами функций
 
-class Sigmoid {
-public:
-    double ApplyFunction(double x);
+        DataType calc(DataType x) const; // Вычисление значения функции активации
+        DataType derivative(DataType x) const; // Вычисление производной функции активации
+        Vector calc(const Vector& x) const; // Вычисление значения функции активации для вектора
+        Matrix derivative(const Vector& x) const; // Вычисление матрицы производных для вектора
 
-    double ApplyDerivative(double x);
+        static ActivationFunction create(ActivationType type); // Создание экземпляра функции активации
 
-};
+    private:
+        Function func_; // Функция активации
+        Function deriv_; // Производная функции активации
+    };
 
+} // namespace neuralnet
