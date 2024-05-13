@@ -1,7 +1,22 @@
-cmake_minimum_required(VERSION 3.25)
-project(neural_network)
+cmake_minimum_required(VERSION 3.14)
 
-set(CMAKE_CXX_STANDARD 17)
+project(MyNeuralNetwork)
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-add_executable(neural_network main.cpp ActivationFunction.cpp LossFunction.cpp Layer.h Layer.cpp NeuralNetwork.h NeuralNetwork.cpp)
+
+add_subdirectory(libs/GoogleTest)
+
+include(src/sources.cmake)
+include(tests/sources.cmake)
+
+enable_testing()
+
+target_link_libraries(
+        test_neural_network
+        neural_network
+        GTest::gtest_main
+)
+
+include(GoogleTest)
+gtest_discover_tests(test_neural_network)
