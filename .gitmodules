@@ -1,9 +1,0 @@
-[submodule "EigenRand"]
-	path = EigenRand
-	url = https://github.com/bab2min/EigenRand
-[submodule "eigen-git-mirror"]
-	path = eigen-git-mirror
-	url = https://github.com/eigenteam/eigen-git-mirror
-[submodule "googletest"]
-	path = googletest
-	url = https://github.com/google/googletest
