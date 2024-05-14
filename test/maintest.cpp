@@ -1,25 +1,37 @@
 #include <gtest/gtest.h>
-#include "Layer.h"
-#include "ActivationFunction.h"
-#include <eigen/Eigen/Dense>
+#include "../src/Layer.h"
+#include "../src/ActivationFunction.h"
+#include "Eigen/Dense"
 
-// Использование пространства имен для удобства
 using namespace neuralnet;
 
-// Тестовый случай для проверки прямого распространения
-TEST(LayerTest, ForwardPass) {
-// Создание слоя с одним входом и одним выходом, без функции активации
- Layer layer(1, 1, ActivationFunction([](double x) { return x; }, [](double x) { return 1; }));
+// Тест линейного слоя
+TEST(LayerTest, ForwardPassLinear) {
+    Layer layer(1, 1, ActivationFunction(
+            [](double x) { return x; },  // Функция: f(x) = x
+            [](double x) { return 1; }   // Производная: f'(x) = 1
+    ));
 
-// Создание входного вектора
-Eigen::VectorXd input(1);
-input << 1.0;
+    Eigen::VectorXd input(1);
+    input << 1.0;
 
-// Выполнение прямого распространения
-Eigen::VectorXd output = layer.forward(input);
+    Eigen::VectorXd output = layer.forward(input);
 
-// Проверка, что выход равен входу (так как функция активации - тождественная)
-ASSERT_NEAR(output[0], 1.0, 1e-9);  // ASSERT_NEAR проверяет, что два значения близки с заданной погрешностью
+    ASSERT_NEAR(output[0], 1.0, 1e-9) << "The output should be equal to the input for a linear activation function.";
+}
+// Тест слоя с нулевым входом
+TEST(LayerTest, ForwardPassZeroInput) {
+    Layer layer(1, 1, ActivationFunction(
+            [](double x) { return x; },  // Функция
+            [](double x) { return 1; }   // Производная
+    ));
+
+    Eigen::VectorXd input(1);
+    input << 0.0;
+
+    Eigen::VectorXd output = layer.forward(input);
+
+    ASSERT_NEAR(output[0], 0.0, 1e-9) << "The output should be zero when the input is zero.";
 }
 
 int main(int argc, char **argv) {

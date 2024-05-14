@@ -1,6 +1,6 @@
 #pragma once
 
-#include "eigen/Eigen/Dense"
+#include "Eigen/Dense"
 #include <fstream>
 #include "ActivationFunction.h"
 

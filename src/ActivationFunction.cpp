@@ -4,14 +4,14 @@
 
 namespace neuralnet {
 
-    ActivationFunction::ActivationFunction(Function func, Function deriv)
+    ActivationFunction::ActivationFunction(function func, function deriv)
             : func_(func), deriv_(deriv) {}
 
-    DataType ActivationFunction::calc(DataType x) const {
+    data_type ActivationFunction::calc(data_type x) const {
         return func_(x);
     }
 
-    DataType ActivationFunction::derivative(DataType x) const {
+    data_type ActivationFunction::derivative(data_type x) const {
         return deriv_(x);
     }
 
@@ -23,24 +23,24 @@ namespace neuralnet {
         return x.unaryExpr(deriv_).asDiagonal();
     }
 
-    ActivationFunction ActivationFunction::create(ActivationType type) {
+    ActivationFunction ActivationFunction::create(activation_type type) {
         switch (type) {
-            case ActivationType::Sigmoid:
+            case activation_type::Sigmoid:
                 return ActivationFunction(
-                        [](DataType x) { return 1.0 / (1.0 + std::exp(-x)); },
-                        [](DataType x) { DataType s = 1.0 / (1.0 + std::exp(-x)); return s * (1 - s); });
-            case ActivationType::Tanh:
+                        [](data_type x) { return 1.0 / (1.0 + std::exp(-x)); },
+                        [](data_type x) { data_type s = 1.0 / (1.0 + std::exp(-x)); return s * (1 - s); });
+            case activation_type::Tanh:
                 return ActivationFunction(
-                        [](DataType x) { return std::tanh(x); },
-                        [](DataType x) { return 1.0 - std::pow(std::tanh(x), 2); });
-            case ActivationType::ReLU:
+                        [](data_type x) { return std::tanh(x); },
+                        [](data_type x) { return 1.0 - std::pow(std::tanh(x), 2); });
+            case activation_type::ReLU:
                 return ActivationFunction(
-                        [](DataType x) { return std::max(0.0, x); },
-                        [](DataType x) { return x > 0 ? 1.0 : 0.0; });
-            case ActivationType::Linear:
+                        [](data_type x) { return std::max(0.0, x); },
+                        [](data_type x) { return x > 0 ? 1.0 : 0.0; });
+            case activation_type::Linear:
                 return ActivationFunction(
-                        [](DataType x) { return x; },
-                        [](DataType x) { return 1.0; });
+                        [](data_type x) { return x; },
+                        [](data_type x) { return 1.0; });
             default:
                 throw std::runtime_error("Unsupported activation type.");
         }

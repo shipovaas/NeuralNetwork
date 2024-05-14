@@ -1,5 +1,5 @@
 #pragma once
-#include "eigen/Eigen/Dense"
+#include "../eigen/Eigen/Dense"
 #include <iostream>
 #include <vector>
 #include <functional>
