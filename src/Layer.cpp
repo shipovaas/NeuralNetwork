@@ -1,4 +1,6 @@
 #include "Layer.h"
+#include "iostream"
+
 
 namespace neuralnet {
 
@@ -8,6 +10,7 @@ namespace neuralnet {
               activation_function(std::move(activation_func)) {}
 
     Eigen::VectorXd Layer::forward(const Eigen::VectorXd& input) {
+        std::cout << "Input to layer size: " << input.size() << std::endl;
         input_cache = input;
         Eigen::VectorXd z = weights * input + biases;
         output_cache = z.unaryExpr([this](double val) { return activation_function.calc(val); });
@@ -15,13 +18,29 @@ namespace neuralnet {
     }
 
     Eigen::VectorXd Layer::backward(const Eigen::VectorXd& grad_output, double learning_rate) {
-        Eigen::VectorXd grad_input = weights.transpose() * grad_output.cwiseProduct(output_cache.unaryExpr([this](double val) { return activation_function.derivative(val); }));
-        Eigen::MatrixXd grad_weights = grad_input * input_cache.transpose();
-        Eigen::VectorXd grad_biases = grad_input;
+        std::cout << "Entering backward: grad_output size " << grad_output.size() << std::endl;
+        std::cout << "weights.transpose() size: " << weights.transpose().rows() << "x" << weights.transpose().cols() << std::endl;
+        std::cout << "output_cache size: " << output_cache.size() << std::endl;
+
+        // Подготовка градиента производной активационной функции
+        Eigen::VectorXd derivative = output_cache.unaryExpr([this](double val) { return activation_function.derivative(val); });
+        Eigen::VectorXd local_grad = grad_output.cwiseProduct(derivative);
+
+        if (weights.rows() != local_grad.size()) {
+            std::cerr << "Error: Mismatch in dimensions for matrix multiplication in backward propagation." << std::endl;
+            throw std::runtime_error("Dimension mismatch in backward propagation.");
+        }
+
+        Eigen::VectorXd grad_input = weights.transpose() * local_grad;
+        Eigen::MatrixXd grad_weights = input_cache * local_grad.transpose();
+        Eigen::VectorXd grad_biases = local_grad;
+
         weights -= learning_rate * grad_weights;
         biases -= learning_rate * grad_biases;
-        return weights.transpose() * grad_input;
+
+        return grad_input;
     }
+
 
     void Layer::save(std::ofstream& file) const {
         file.write(reinterpret_cast<const char*>(weights.data()), weights.size() * sizeof(double));

@@ -27,13 +27,17 @@ namespace neuralnet {
                 Eigen::VectorXd target = targets.col(i);
                 Eigen::VectorXd output = predict(input);
 
+                // Начало обратного распространения ошибки с вычисления начального градиента
                 Eigen::VectorXd error = target - output;
-                for (auto & layer : layers) {
-                    error = layer.backward(error, learning_rate);
+
+                // Обратное распространение через каждый слой, начиная с последнего
+                for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
+                    error = it->backward(error, learning_rate);
                 }
             }
         }
     }
+
 
     double NeuralNetwork::evaluate(const Eigen::MatrixXd& inputs, const Eigen::MatrixXd& targets) {
         double loss = 0.0;

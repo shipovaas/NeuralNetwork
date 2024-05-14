@@ -5,48 +5,63 @@
 #include "Eigen/Dense"
 #include "../mnist/include/mnist/mnist_reader.hpp"
 
-
 using namespace neuralnet;
+
 int main() {
     // Загрузка данных MNIST
-    auto dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>( "../../mnist");
+    auto dataset = mnist::read_dataset<std::vector, std::vector, uint8_t, uint8_t>("../../mnist");
 
-    // Нормализация и подготовка данных
+    // Нормализация данных
     int input_size = 784;  // 28x28 пикселей
     int num_classes = 10;  // 10 классов цифр
-    Eigen::MatrixXd inputs(input_size, dataset.training_images.size());
-    Eigen::MatrixXd targets = Eigen::MatrixXd::Zero(num_classes, dataset.training_images.size());
 
-    for (size_t i = 0; i < dataset.training_images.size(); ++i) {
-        for (size_t j = 0; j < input_size; ++j) {
-            inputs(j, i) = dataset.training_images[i][j] / 255.0;
-        }
-        targets(dataset.training_labels[i], i) = 1.0;
-    }
-
-// Создание нейросети
-// Создание нейросети
-    neuralnet::NeuralNetwork network;
-    network.add_layer(neuralnet::Layer(784, 128, neuralnet::ActivationFunction::create(neuralnet::activation_type::ReLU)));
-    network.add_layer(neuralnet::Layer(128, 10, neuralnet::ActivationFunction::create(neuralnet::activation_type::Sigmoid)));
+    // Создание нейросети
+    NeuralNetwork network;
+    network.add_layer(Layer(input_size, 128, ActivationFunction::create(activation_type::ReLU)));
+    network.add_layer(Layer(128, num_classes, ActivationFunction::create(activation_type::Sigmoid)));
 
     std::cout << "Network created with layers configured." << std::endl;
-// Убедитесь, что inputs и targets имеют правильные размеры перед передачей их в сеть
-    std::cout << "Inputs size: " << inputs.rows() << "x" << inputs.cols() << std::endl;
-    std::cout << "Targets size: " << targets.rows() << "x" << targets.cols() << std::endl;
 
-// Здесь должны быть вызовы функций обучения или предсказания
-    network.fit(inputs, targets, 10, 0.01);
+    // Обработка каждого образца индивидуально
+    for (size_t i = 0; i < dataset.training_images.size(); ++i) {
+        Eigen::VectorXd input = Eigen::VectorXd::Zero(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input(j) = dataset.training_images[i][j] / 255.0;
+        }
 
-// Обучение
-    network.fit(inputs, targets, 10, 0.01);  // 10 эпох, скорость обучения 0.01
+        Eigen::VectorXd target = Eigen::VectorXd::Zero(num_classes);
+        target(dataset.training_labels[i]) = 1.0;
 
-// Оценка
-    double accuracy = network.evaluate(inputs, targets);
+        // Подготовка матрицы для одиночного ввода и цели
+        Eigen::MatrixXd single_input = input;
+        Eigen::MatrixXd single_target = target;
+
+        // Обучение сети на одном образце
+        network.fit(single_input, single_target, 1, 0.01);
+    }
+
+    // Оценка сети (простой пример, где мы используем тренировочный набор для оценки)
+    double correct_predictions = 0;
+    for (size_t i = 0; i < dataset.training_images.size(); ++i) {
+        Eigen::VectorXd input = Eigen::VectorXd::Zero(input_size);
+        for (size_t j = 0; j < input_size; ++j) {
+            input(j) = dataset.training_images[i][j] / 255.0;
+        }
+
+        Eigen::VectorXd predicted = network.predict(input);
+        int predicted_label = std::distance(predicted.data(), std::max_element(predicted.data(), predicted.data() + predicted.size()));
+
+        if (predicted_label == dataset.training_labels[i]) {
+            correct_predictions += 1;
+        }
+    }
+
+    double accuracy = correct_predictions / dataset.training_images.size();
     std::cout << "Accuracy: " << accuracy * 100 << "%" << std::endl;
 
     return 0;
 }
+
 
 
 // Тест линейного слоя
