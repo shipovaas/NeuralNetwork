@@ -1,20 +1,21 @@
 #include "NeuralNetwork.h"
 #include <fstream>
 #include <memory>
+#include <ranges>
 #include <vector>
 
 namespace neuralnet {
 
-    NeuralNetwork::NeuralNetwork() {}
+//    NeuralNetwork::NeuralNetwork() {}
 
-    void NeuralNetwork::add_layer(std::shared_ptr<Layer> layer) {
-        layers.push_back(layer);
+    void NeuralNetwork::add_layer(Layer&& layer) {
+        layers.push_back(std::move(layer));
     }
 
     Eigen::VectorXd NeuralNetwork::predict(const Eigen::VectorXd& input) {
         Eigen::VectorXd output = input;
         for (auto& layer : layers) {
-            output = layer->forward(output);
+            output = layer.forward(output);
         }
         return output;
     }
@@ -27,8 +28,8 @@ namespace neuralnet {
                 Eigen::VectorXd output = predict(input);
 
                 Eigen::VectorXd error = target - output;
-                for (auto it = layers.rbegin(); it != layers.rend(); ++it) {
-                    error = (*it)->backward(error, learning_rate);
+                for (auto & layer : layers) {
+                    error = layer.backward(error, learning_rate);
                 }
             }
         }
@@ -40,7 +41,7 @@ namespace neuralnet {
             Eigen::VectorXd output = predict(inputs.col(i));
             loss += (targets.col(i) - output).squaredNorm();
         }
-        return loss / inputs.cols();
+        return loss / static_cast<double>(inputs.cols());
     }
 
     void NeuralNetwork::save(const std::string& filename) const {
@@ -49,7 +50,7 @@ namespace neuralnet {
             throw std::runtime_error("Unable to open file for writing.");
         }
         for (auto& layer : layers) {
-            layer->save(file);
+            layer.save(file);
         }
     }
 
@@ -59,7 +60,7 @@ namespace neuralnet {
             throw std::runtime_error("Unable to open file for reading.");
         }
         for (auto& layer : layers) {
-            layer->load(file);
+            layer.load(file);
         }
     }
 

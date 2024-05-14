@@ -8,9 +8,9 @@ namespace neuralnet {
 
     class NeuralNetwork {
     public:
-        NeuralNetwork();
+        NeuralNetwork() = default;
 
-        void add_layer(std::shared_ptr<Layer> layer);
+        void add_layer(Layer&& layer);
         Eigen::VectorXd predict(const Eigen::VectorXd& input);
 
         void fit(const Eigen::MatrixXd& inputs, const Eigen::MatrixXd& targets, int epochs, double learning_rate);
@@ -20,7 +20,7 @@ namespace neuralnet {
         void load(const std::string& filename);
 
     private:
-        std::vector<std::shared_ptr<Layer>> layers;
+        std::vector<Layer> layers;
     };
 
 } // namespace neuralnet
