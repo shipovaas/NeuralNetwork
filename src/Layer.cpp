@@ -1,6 +1,5 @@
 #include "Layer.h"
-#include "iostream"
-
+#include <iostream>
 
 namespace neuralnet {
 
@@ -22,25 +21,33 @@ namespace neuralnet {
         std::cout << "weights.transpose() size: " << weights.transpose().rows() << "x" << weights.transpose().cols() << std::endl;
         std::cout << "output_cache size: " << output_cache.size() << std::endl;
 
-        // Подготовка градиента производной активационной функции
+        if (grad_output.size() != output_cache.size()) {
+            throw std::runtime_error("Mismatch in grad_output size and output_cache size in backward propagation.");
+        }
         Eigen::VectorXd derivative = output_cache.unaryExpr([this](double val) { return activation_function.derivative(val); });
         Eigen::VectorXd local_grad = grad_output.cwiseProduct(derivative);
+        Eigen::MatrixXd grad_weights = input_cache * local_grad.transpose();
 
-        if (weights.rows() != local_grad.size()) {
-            std::cerr << "Error: Mismatch in dimensions for matrix multiplication in backward propagation." << std::endl;
-            throw std::runtime_error("Dimension mismatch in backward propagation.");
-        }
 
         Eigen::VectorXd grad_input = weights.transpose() * local_grad;
-        Eigen::MatrixXd grad_weights = input_cache * local_grad.transpose();
+        if (grad_input.size() != input_cache.size()) {
+            throw std::runtime_error("Mismatch in input_cache size and grad_input size.");
+        }
+
+        if (grad_weights.rows() != weights.rows() || grad_weights.cols() != weights.cols()) {
+            throw std::runtime_error("Mismatch in dimensions for weight gradients.");
+        }
+
         Eigen::VectorXd grad_biases = local_grad;
+        if (grad_biases.size() != biases.size()) {
+            throw std::runtime_error("Mismatch in biases size and grad_biases size.");
+        }
 
         weights -= learning_rate * grad_weights;
         biases -= learning_rate * grad_biases;
 
         return grad_input;
     }
-
 
     void Layer::save(std::ofstream& file) const {
         file.write(reinterpret_cast<const char*>(weights.data()), weights.size() * sizeof(double));
@@ -59,5 +66,4 @@ namespace neuralnet {
     const Eigen::VectorXd& Layer::get_biases() const {
         return biases;
     }
-
-} // namespace neuralnet
+}
