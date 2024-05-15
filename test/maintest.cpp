@@ -17,8 +17,8 @@ int main() {
 
 
     NeuralNetwork network;
-    network.add_layer(Layer(input_size, 128, ActivationFunction::create(activation_type::ReLU)));
-    network.add_layer(Layer(128, num_classes, ActivationFunction::create(activation_type::Sigmoid)));
+    network.add_layer(Layer(input_size, 10, ActivationFunction::create(activation_type::ReLU)));
+    //network.add_layer(Layer(128, num_classes, ActivationFunction::create(activation_type::Sigmoid)));
 
     Eigen::MatrixXd inputs(input_size, batch_size);
     Eigen::MatrixXd targets(num_classes, batch_size);

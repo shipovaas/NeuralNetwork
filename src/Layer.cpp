@@ -26,8 +26,12 @@ namespace neuralnet {
         }
         Eigen::VectorXd derivative = output_cache.unaryExpr([this](double val) { return activation_function.derivative(val); });
         Eigen::VectorXd local_grad = grad_output.cwiseProduct(derivative);
-        Eigen::MatrixXd grad_weights = input_cache * local_grad.transpose();
-
+        Eigen::MatrixXd transposed_grad_weights = input_cache * local_grad.transpose();
+        Eigen::MatrixXd grad_weights = transposed_grad_weights.transpose();
+        std::cout<<" grad_weights.cols() "<<grad_weights.cols()<<std::endl;
+        std::cout<<" weights.cols() "<<weights.cols()<<std::endl;
+        std::cout<<" grad_weights.rows() "<<grad_weights.rows()<<std::endl;
+        std::cout<<"weights.rows() "<< weights.rows()<<std::endl;
 
         Eigen::VectorXd grad_input = weights.transpose() * local_grad;
         if (grad_input.size() != input_cache.size()) {
