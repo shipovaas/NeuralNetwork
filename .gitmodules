@@ -1,0 +1,12 @@
+[submodule "eigen"]
+	path = eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "gtest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
+[submodule "eigenrand"]
+	path = EigenRand
+	url = https://github.com/bab2min/EigenRand.git
+[submodule "mnist"]
+	path = mnist
+	url = git@github.com:wichtounet/mnist.git
